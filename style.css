@@ -512,8 +512,8 @@ body::after {
     top: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.8);
-    backdrop-filter: blur(10px);
+    background: rgba(0,0,0,0.3);
+    backdrop-filter: blur(3px);
     animation: fadeIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
@@ -523,7 +523,7 @@ body::after {
 }
 
 .modal-content {
-    background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%);
+    background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(245,245,245,0.95) 100%);
     margin: 2% auto;
     padding: 25px;
     border-radius: 20px;
@@ -534,6 +534,69 @@ body::after {
         inset 0 0 30px rgba(255,255,255,0.5);
     animation: slideDown 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     border: 3px solid rgba(255,255,255,0.3);
+}
+
+/* Modal with tree */
+.modal-content.question-with-tree {
+    max-width: 1100px;
+    padding: 20px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(245,245,245,0.98) 100%);
+    display: flex;
+    gap: 30px;
+}
+
+/* Tree container in modal */
+.question-tree-container {
+    flex: 0 0 240px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+#modal-tree-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+#modal-team-label {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #667eea;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+#modal-timer {
+    font-size: 2em;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 30px;
+    padding: 10px 20px;
+    background: linear-gradient(145deg, #f0f0f0, #ffffff);
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    position: relative;
+    z-index: 20;
+}
+
+.modal-tree {
+    position: relative;
+    height: 380px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: visible;
+}
+
+/* Question content container */
+.question-content-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 @keyframes slideDown {
@@ -688,6 +751,24 @@ body::after {
     100% { transform: scale(1) rotate(0deg); }
 }
 
+.option.show-wrong {
+    background: linear-gradient(145deg, #e74c3c, #c0392b);
+    color: white;
+    border-color: #c0392b;
+    animation: wrongAnswer 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    box-shadow:
+        0 10px 30px rgba(231,76,60,0.5),
+        0 0 30px rgba(231,76,60,0.3);
+}
+
+@keyframes wrongAnswer {
+    0% { transform: scale(1) rotate(0deg); }
+    25% { transform: scale(1.05) rotate(-3deg); }
+    50% { transform: scale(1.05) rotate(3deg); }
+    75% { transform: scale(1.05) rotate(-3deg); }
+    100% { transform: scale(1) rotate(0deg); }
+}
+
 .option.disabled {
     cursor: not-allowed;
     opacity: 0.6;
@@ -719,6 +800,147 @@ body::after {
     }
 }
 
+/* Game Timer */
+#game-timer-container {
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 20px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+}
+
+#game-timer-label {
+    color: #fff;
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+#game-timer {
+    display: inline-block;
+    font-size: 3em;
+    font-weight: bold;
+    color: #fff;
+    padding: 20px 40px;
+    background: linear-gradient(145deg, #667eea, #764ba2);
+    border-radius: 20px;
+    margin-bottom: 15px;
+    box-shadow:
+        0 10px 30px rgba(0,0,0,0.3),
+        inset 0 -3px 7px rgba(0,0,0,0.2),
+        inset 0 3px 7px rgba(255,255,255,0.2);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+/* Team Label */
+.team-label {
+    color: #fff;
+    font-size: 1.2em;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 10px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+/* Current Team Label in Modal */
+#current-team-label {
+    text-align: center;
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #667eea;
+    margin-bottom: 15px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Show Team Question Buttons */
+.show-team-question-btn {
+    padding: 12px 20px;
+    font-size: 0.9em;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    background: linear-gradient(145deg, #3498db, #2980b9);
+    color: white;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 10px;
+    box-shadow:
+        0 6px 15px rgba(52,152,219,0.4),
+        inset 0 -2px 5px rgba(0,0,0,0.2),
+        inset 0 2px 5px rgba(255,255,255,0.2);
+}
+
+.show-team-question-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow:
+        0 10px 25px rgba(52,152,219,0.6),
+        inset 0 -2px 5px rgba(0,0,0,0.2),
+        inset 0 2px 5px rgba(255,255,255,0.3),
+        0 0 20px rgba(52,152,219,0.5);
+}
+
+.show-team-question-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: 0 6px 15px rgba(52,152,219,0.2);
+}
+
+.show-team-question-btn:active:not(:disabled) {
+    transform: translateY(-1px) scale(1.02);
+}
+
+/* Answer Buttons Container */
+#answer-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+/* Correct Answer Button */
+.correct-btn {
+    background: linear-gradient(145deg, #2ecc71, #27ae60);
+    padding: 15px 40px;
+    font-size: 1.2em;
+}
+
+.correct-btn:hover {
+    box-shadow:
+        0 12px 25px rgba(46,204,113,0.6),
+        inset 0 -3px 7px rgba(0,0,0,0.2),
+        inset 0 3px 7px rgba(255,255,255,0.3),
+        0 0 20px rgba(46,204,113,0.5);
+}
+
+/* Wrong Answer Button */
+.wrong-btn {
+    background: linear-gradient(145deg, #e74c3c, #c0392b);
+    padding: 15px 40px;
+    font-size: 1.2em;
+}
+
+.wrong-btn:hover {
+    box-shadow:
+        0 12px 25px rgba(231,76,60,0.6),
+        inset 0 -3px 7px rgba(0,0,0,0.2),
+        inset 0 3px 7px rgba(255,255,255,0.3),
+        0 0 20px rgba(231,76,60,0.5);
+}
+
+/* Update controls layout */
+.controls {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     #trees-container {
@@ -734,15 +956,34 @@ body::after {
     }
 
     #header h1 {
-        font-size: 2em;
+        font-size: 1.5em;
     }
 
     #question-text {
-        font-size: 1.3em;
+        font-size: 1.1em;
     }
 
     .modal-content {
-        padding: 30px;
+        padding: 20px;
+    }
+
+    .modal-content.question-with-tree {
+        flex-direction: column;
+        max-width: 95%;
+    }
+
+    .question-tree-container {
+        flex: none;
+        width: 100%;
+    }
+
+    .modal-tree {
+        height: 300px;
+    }
+
+    #modal-timer {
+        font-size: 1.5em;
+        padding: 8px 15px;
     }
 
     .monkey {
@@ -750,10 +991,8 @@ body::after {
         height: 50px;
     }
 
-    #timer {
-        width: 100px;
-        height: 100px;
-        line-height: 88px;
-        font-size: 2.5em;
+    .show-team-question-btn {
+        font-size: 0.75em;
+        padding: 10px 15px;
     }
 }

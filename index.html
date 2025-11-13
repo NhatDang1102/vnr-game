@@ -10,19 +10,10 @@
     <div id="game-container">
         <!-- Header -->
         <div id="header">
-            <h1>Trò Chơi Khỉ Leo Cây</h1>
-
-            <!-- Progress Bar -->
-            <div id="progress-container">
-                <div id="progress-text">Câu hỏi: <span id="current-question">0</span>/<span id="total-questions">40</span></div>
-                <div id="progress-bar">
-                    <div id="progress-fill"></div>
-                </div>
-            </div>
+            <h1>Trò Chơi Khỉ Leo Cây - Nhanh Như Chớp</h1>
 
             <div class="header-buttons">
                 <button id="spin-wheel-btn" class="main-btn">Quay Số</button>
-                <button id="show-question-btn" class="main-btn">Hiện Câu Hỏi</button>
             </div>
         </div>
 
@@ -43,6 +34,7 @@
             <!-- Trees and Monkeys -->
             <div id="trees-container">
                 <div class="tree-section" data-team="0">
+                    <div class="team-label">Nhóm 1</div>
                     <div class="tree">
                         <div class="monkey-container">
                             <img src="monkey-sprite.png" class="monkey monkey-red" data-team="0" alt="Monkey 1">
@@ -52,10 +44,12 @@
                     <div class="controls">
                         <button class="up-btn" data-team="0">▲ Lên</button>
                         <button class="down-btn" data-team="0">▼ Xuống</button>
+                        <button class="show-team-question-btn" data-team="0">Hiện Câu Hỏi Nhóm 1</button>
                     </div>
                 </div>
 
                 <div class="tree-section" data-team="1">
+                    <div class="team-label">Nhóm 2</div>
                     <div class="tree">
                         <div class="monkey-container">
                             <img src="monkey-sprite.png" class="monkey monkey-blue" data-team="1" alt="Monkey 2">
@@ -65,10 +59,12 @@
                     <div class="controls">
                         <button class="up-btn" data-team="1">▲ Lên</button>
                         <button class="down-btn" data-team="1">▼ Xuống</button>
+                        <button class="show-team-question-btn" data-team="1">Hiện Câu Hỏi Nhóm 2</button>
                     </div>
                 </div>
 
                 <div class="tree-section" data-team="2">
+                    <div class="team-label">Nhóm 3</div>
                     <div class="tree">
                         <div class="monkey-container">
                             <img src="monkey-sprite.png" class="monkey monkey-green" data-team="2" alt="Monkey 3">
@@ -78,10 +74,12 @@
                     <div class="controls">
                         <button class="up-btn" data-team="2">▲ Lên</button>
                         <button class="down-btn" data-team="2">▼ Xuống</button>
+                        <button class="show-team-question-btn" data-team="2">Hiện Câu Hỏi Nhóm 3</button>
                     </div>
                 </div>
 
                 <div class="tree-section" data-team="3">
+                    <div class="team-label">Nhóm 4</div>
                     <div class="tree">
                         <div class="monkey-container">
                             <img src="monkey-sprite.png" class="monkey monkey-yellow" data-team="3" alt="Monkey 4">
@@ -91,6 +89,7 @@
                     <div class="controls">
                         <button class="up-btn" data-team="3">▲ Lên</button>
                         <button class="down-btn" data-team="3">▼ Xuống</button>
+                        <button class="show-team-question-btn" data-team="3">Hiện Câu Hỏi Nhóm 4</button>
                     </div>
                 </div>
             </div>
@@ -98,14 +97,26 @@
 
         <!-- Question Modal -->
         <div id="question-modal" class="modal">
-            <div class="modal-content">
-                <div id="timer-container">
-                    <div id="timer">30</div>
+            <div class="modal-content question-with-tree">
+                <div class="question-tree-container">
+                    <!-- Tree display -->
+                    <div id="modal-tree-section">
+                        <div id="modal-team-label">Nhóm 1</div>
+                        <div id="modal-timer">300</div>
+                        <div class="modal-tree">
+                            <div id="modal-monkey-container" class="monkey-container">
+                                <img src="monkey-sprite.png" id="modal-monkey" class="monkey monkey-red" alt="Monkey">
+                            </div>
+                            <div class="tree-trunk"></div>
+                        </div>
+                    </div>
                 </div>
-                <div id="question-text"></div>
-                <div id="options-container"></div>
-                <button id="show-answer-btn" class="main-btn">Hiện Đáp Án</button>
-                <button id="close-modal-btn" class="main-btn secondary">Đóng</button>
+
+                <div class="question-content-container">
+                    <div id="question-text"></div>
+                    <div id="options-container"></div>
+                    <button id="close-modal-btn" class="main-btn secondary">Đóng</button>
+                </div>
             </div>
         </div>
     </div>

@@ -1,4 +1,4 @@
-// Questions Data
+// Questions Data - Chia thành 4 nhóm, mỗi nhóm 10 câu
 const questions = [
   {
     "question": "Đại hội VI (1986) mở ra đường lối gì cho đất nước?",
@@ -402,38 +402,52 @@ const questions = [
   }
 ];
 
-// Game State
-let currentQuestionIndex = 0;
-let usedQuestions = [];
-let monkeyPositions = [0, 0, 0, 0]; // Positions for 4 teams (0-20 steps)
-const MAX_POSITION = 20;
-const STEP_HEIGHT = 20; // pixels per step (reduced for 20 steps)
+// Chia câu hỏi thành 4 nhóm
+const teamQuestions = [
+  questions.slice(0, 10),   // Nhóm 1: câu 0-9
+  questions.slice(10, 20),  // Nhóm 2: câu 10-19
+  questions.slice(20, 30),  // Nhóm 3: câu 20-29
+  questions.slice(30, 40)   // Nhóm 4: câu 30-39
+];
 
-let timer = 30;
-let timerInterval = null;
+// Game State
+let currentTeam = 0;
+let currentQuestionIndex = 0;
+let teamCurrentQuestion = [0, 0, 0, 0]; // Chỉ số câu hỏi hiện tại của mỗi nhóm
+let teamTimers = [120, 120, 120, 120]; // Mỗi nhóm có 120 giây (2 phút)
+let monkeyPositions = [0, 0, 0, 0]; // Vị trí của 4 nhóm (0-10 bậc)
+const MAX_POSITION = 10; // 10 bậc
+const STEP_HEIGHT = 40; // pixels per step
+
+let teamTimerInterval = null;
+
 let backgroundMusic = null;
+let isAnswering = false; // Để tránh click nhiều lần
+
+const teamColors = ['monkey-red', 'monkey-blue', 'monkey-green', 'monkey-yellow'];
+const teamNames = ['Nhóm 1', 'Nhóm 2', 'Nhóm 3', 'Nhóm 4'];
 
 // DOM Elements
-const showQuestionBtn = document.getElementById('show-question-btn');
 const questionModal = document.getElementById('question-modal');
 const questionText = document.getElementById('question-text');
 const optionsContainer = document.getElementById('options-container');
-const timerDisplay = document.getElementById('timer');
-const showAnswerBtn = document.getElementById('show-answer-btn');
+const modalTimerDisplay = document.getElementById('modal-timer');
+const modalTeamLabel = document.getElementById('modal-team-label');
+const modalMonkey = document.getElementById('modal-monkey');
+const modalMonkeyContainer = document.getElementById('modal-monkey-container');
 const closeModalBtn = document.getElementById('close-modal-btn');
 const upButtons = document.querySelectorAll('.up-btn');
 const downButtons = document.querySelectorAll('.down-btn');
+const showTeamQuestionBtns = document.querySelectorAll('.show-team-question-btn');
 const monkeys = document.querySelectorAll('.monkey');
 
 // Initialize Game
 function initGame() {
-    console.log(`Đã load ${questions.length} câu hỏi`);
+    console.log(`Đã load ${questions.length} câu hỏi, chia thành 4 nhóm`);
 
     backgroundMusic = document.getElementById('background-music');
 
     // Event Listeners
-    showQuestionBtn.addEventListener('click', showQuestion);
-    showAnswerBtn.addEventListener('click', showAnswer);
     closeModalBtn.addEventListener('click', closeModal);
 
     // Up/Down buttons
@@ -451,22 +465,201 @@ function initGame() {
         });
     });
 
+    // Show team question buttons
+    showTeamQuestionBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const team = parseInt(btn.dataset.team);
+            showTeamQuestion(team);
+        });
+    });
+
     // Initialize monkey positions
     updateAllMonkeyPositions();
-
-    // Initialize progress bar
-    document.getElementById('total-questions').textContent = questions.length;
-    updateProgress();
 }
 
-// Update Progress Bar
-function updateProgress() {
-    const currentQuestion = usedQuestions.length;
-    const totalQuestions = questions.length;
-    const percentage = (currentQuestion / totalQuestions) * 100;
+// Reset Game
+function resetGame() {
+    teamCurrentQuestion = [0, 0, 0, 0];
+    teamTimers = [180, 180, 180, 180];
+    monkeyPositions = [0, 0, 0, 0];
 
-    document.getElementById('current-question').textContent = currentQuestion;
-    document.getElementById('progress-fill').style.width = `${percentage}%`;
+    // Stop timer
+    if (teamTimerInterval) {
+        clearInterval(teamTimerInterval);
+        teamTimerInterval = null;
+    }
+
+    stopMusic();
+
+    // Update display
+    updateAllMonkeyPositions();
+
+    // Close modal if open
+    questionModal.style.display = 'none';
+}
+
+// Show Team Question
+function showTeamQuestion(team) {
+    currentTeam = team;
+    const questionIndex = teamCurrentQuestion[team];
+
+    if (questionIndex >= 10) {
+        alert(`${teamNames[team]} đã hết câu hỏi!`);
+        return;
+    }
+
+    if (teamTimers[team] <= 0) {
+        alert(`${teamNames[team]} đã hết thời gian!`);
+        return;
+    }
+
+    currentQuestionIndex = questionIndex;
+    const question = teamQuestions[team][questionIndex];
+
+    // Update modal team label and monkey color
+    modalTeamLabel.textContent = `${teamNames[team]} - Câu ${questionIndex + 1}/10`;
+
+    // Change monkey color
+    modalMonkey.className = `monkey ${teamColors[team]}`;
+
+    // Update modal monkey position
+    updateModalMonkeyPosition(team);
+
+    // Display question
+    questionText.textContent = question.question;
+
+    // Display options
+    optionsContainer.innerHTML = '';
+    question.options.forEach((option, index) => {
+        const optionDiv = document.createElement('div');
+        optionDiv.className = 'option';
+        optionDiv.textContent = `${String.fromCharCode(65 + index)}. ${option}`;
+        optionDiv.dataset.index = index;
+
+        // Add click handler
+        optionDiv.addEventListener('click', () => handleOptionClick(index));
+
+        optionsContainer.appendChild(optionDiv);
+    });
+
+    // Update timer display
+    updateTimerDisplay(team);
+
+    // Show modal
+    questionModal.style.display = 'block';
+
+    // Reset answering state
+    isAnswering = false;
+
+    // Start timer for this team
+    startTeamTimer(team);
+
+    // Play music
+    playMusic();
+}
+
+// Start Team Timer
+function startTeamTimer(team) {
+    // Clear existing timer
+    if (teamTimerInterval) {
+        clearInterval(teamTimerInterval);
+    }
+
+    teamTimerInterval = setInterval(() => {
+        teamTimers[team]--;
+        updateTimerDisplay(team);
+
+        // Update modal monkey position continuously
+        updateModalMonkeyPosition(team);
+
+        if (teamTimers[team] <= 0) {
+            clearInterval(teamTimerInterval);
+            teamTimerInterval = null;
+            stopMusic();
+            alert(`⏰ ${teamNames[team]} hết thời gian!`);
+            questionModal.style.display = 'none';
+        }
+    }, 1000);
+}
+
+// Update Timer Display
+function updateTimerDisplay(team) {
+    const seconds = teamTimers[team];
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    modalTimerDisplay.textContent = `${minutes}:${secs.toString().padStart(2, '0')}`;
+
+    // Warning color when < 30 seconds
+    if (seconds <= 30) {
+        modalTimerDisplay.style.color = '#e74c3c';
+    } else {
+        modalTimerDisplay.style.color = '#2c3e50';
+    }
+}
+
+// Update Modal Monkey Position
+function updateModalMonkeyPosition(team) {
+    const bottomPosition = monkeyPositions[team] * STEP_HEIGHT;
+    modalMonkeyContainer.style.bottom = `${bottomPosition}px`;
+}
+
+// Handle Option Click
+function handleOptionClick(selectedIndex) {
+    if (isAnswering) return; // Tránh click nhiều lần
+
+    isAnswering = true;
+
+    // KHÔNG dừng timer - để timer chạy liên tục
+    // KHÔNG dừng music - để nhạc chạy liên tục
+
+    const question = teamQuestions[currentTeam][currentQuestionIndex];
+    const options = document.querySelectorAll('.option');
+    const isCorrect = selectedIndex === question.correctAnswer;
+
+    // Disable all options
+    options.forEach((option, index) => {
+        option.classList.add('disabled');
+        option.style.pointerEvents = 'none';
+
+        // Show correct answer
+        if (index === question.correctAnswer) {
+            option.classList.add('show-correct');
+        }
+
+        // Show wrong answer if selected
+        if (index === selectedIndex && !isCorrect) {
+            option.classList.add('show-wrong');
+        }
+    });
+
+    // Update monkey position
+    if (isCorrect) {
+        moveMonkey(currentTeam, 1);
+    } else {
+        // Tụt về vị trí 0
+        monkeyPositions[currentTeam] = 0;
+        updateMonkeyPosition(currentTeam, -1);
+        updateModalMonkeyPosition(currentTeam);
+    }
+
+    // Move to next question
+    teamCurrentQuestion[currentTeam]++;
+
+    // Auto move to next question after 1.5 seconds
+    setTimeout(() => {
+        if (teamCurrentQuestion[currentTeam] < 10 && teamTimers[currentTeam] > 0) {
+            showTeamQuestion(currentTeam);
+        } else {
+            if (teamCurrentQuestion[currentTeam] >= 10) {
+                alert(`${teamNames[currentTeam]} đã hoàn thành 10 câu hỏi!`);
+            }
+            if (teamTimerInterval) {
+                clearInterval(teamTimerInterval);
+            }
+            stopMusic();
+            questionModal.style.display = 'none';
+        }
+    }, 1500);
 }
 
 // Move Monkey
@@ -476,6 +669,7 @@ function moveMonkey(team, direction) {
     if (newPosition >= 0 && newPosition <= MAX_POSITION) {
         monkeyPositions[team] = newPosition;
         updateMonkeyPosition(team, direction);
+        updateModalMonkeyPosition(team);
 
         // Play monkey sound
         playMonkeySound();
@@ -484,7 +678,7 @@ function moveMonkey(team, direction) {
         if (newPosition === MAX_POSITION) {
             setTimeout(() => {
                 createConfetti();
-                alert(`🎉 Nhóm ${team + 1} đã leo đến đỉnh cây! Chúc mừng!`);
+                alert(`🎉 ${teamNames[team]} đã leo đến đỉnh cây! Chúc mừng!`);
             }, 500);
         }
     }
@@ -520,81 +714,10 @@ function updateAllMonkeyPositions() {
     }
 }
 
-// Show Question
-function showQuestion() {
-    if (usedQuestions.length >= questions.length) {
-        alert('Đã hết câu hỏi! Trò chơi kết thúc.');
-        return;
-    }
-
-    // Get random unused question
-    let questionIndex;
-    do {
-        questionIndex = Math.floor(Math.random() * questions.length);
-    } while (usedQuestions.includes(questionIndex));
-
-    usedQuestions.push(questionIndex);
-    currentQuestionIndex = questionIndex;
-
-    // Update progress bar
-    updateProgress();
-
-    const question = questions[currentQuestionIndex];
-
-    // Display question
-    questionText.textContent = question.question;
-
-    // Display options
-    optionsContainer.innerHTML = '';
-    question.options.forEach((option, index) => {
-        const optionDiv = document.createElement('div');
-        optionDiv.className = 'option';
-        optionDiv.textContent = `${String.fromCharCode(65 + index)}. ${option}`;
-        optionDiv.dataset.index = index;
-        optionsContainer.appendChild(optionDiv);
-    });
-
-    // Reset timer
-    timer = 30;
-    timerDisplay.textContent = timer;
-    timerDisplay.classList.remove('warning');
-
-    // Show modal
-    questionModal.style.display = 'block';
-
-    // Start timer and music
-    startTimer();
-    playMusic();
-
-    // Hide show answer button initially
-    showAnswerBtn.style.display = 'inline-block';
-}
-
-// Start Timer
-function startTimer() {
-    if (timerInterval) {
-        clearInterval(timerInterval);
-    }
-
-    timerInterval = setInterval(() => {
-        timer--;
-        timerDisplay.textContent = timer;
-
-        if (timer <= 10) {
-            timerDisplay.classList.add('warning');
-        }
-
-        if (timer <= 0) {
-            clearInterval(timerInterval);
-            showAnswer();
-        }
-    }, 1000);
-}
-
 // Play Music
 function playMusic() {
-    if (backgroundMusic) {
-        backgroundMusic.currentTime = 0;
+    if (backgroundMusic && backgroundMusic.paused) {
+        // Chỉ play nếu nhạc chưa phát, không reset lại từ đầu
         backgroundMusic.play().catch(error => {
             console.log('Không thể phát nhạc:', error);
         });
@@ -613,48 +736,24 @@ function stopMusic() {
 function playMonkeySound() {
     const monkeySound = document.getElementById('monkey-sound');
     if (monkeySound) {
-        monkeySound.currentTime = 0;
-        monkeySound.play().catch(error => {
+        // Clone audio để phát nhiều lần cùng lúc mà không bị gián đoạn
+        // Phải dùng cloneNode(true) để copy cả thẻ <source> bên trong
+        const soundClone = monkeySound.cloneNode(true);
+        soundClone.play().catch(error => {
             console.log('Không thể phát tiếng khỉ:', error);
         });
     }
 }
 
-// Show Answer
-function showAnswer() {
-    if (timerInterval) {
-        clearInterval(timerInterval);
-    }
-
-    stopMusic();
-
-    const question = questions[currentQuestionIndex];
-    const options = document.querySelectorAll('.option');
-
-    options.forEach((option, index) => {
-        option.classList.add('disabled');
-        if (index === question.correctAnswer) {
-            option.classList.add('show-correct');
-        }
-    });
-
-    showAnswerBtn.style.display = 'none';
-    timerDisplay.classList.remove('warning');
-}
-
 // Close Modal
 function closeModal() {
-    if (timerInterval) {
-        clearInterval(timerInterval);
+    if (teamTimerInterval) {
+        clearInterval(teamTimerInterval);
     }
 
     stopMusic();
 
     questionModal.style.display = 'none';
-
-    // Reset timer display
-    timerDisplay.textContent = '30';
-    timerDisplay.classList.remove('warning');
 }
 
 // Create Confetti Effect
@@ -698,12 +797,6 @@ document.addEventListener('keydown', (e) => {
     // ESC to close modal
     if (e.key === 'Escape' && questionModal.style.display === 'block') {
         closeModal();
-    }
-
-    // Space to show answer
-    if (e.key === ' ' && questionModal.style.display === 'block' && showAnswerBtn.style.display !== 'none') {
-        e.preventDefault();
-        showAnswer();
     }
 
     // Number keys 1-4 for team up
