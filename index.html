@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khỉ Leo Cây - Quiz Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <!-- Header -->
+        <div id="header">
+            <h1>Trò Chơi Khỉ Leo Cây</h1>
+            <button id="show-question-btn" class="main-btn">Hiện Câu Hỏi</button>
+        </div>
+
+        <!-- Game Area -->
+        <div id="game-area">
+            <!-- Trees and Monkeys -->
+            <div id="trees-container">
+                <div class="tree-section" data-team="0">
+                    <div class="tree">
+                        <div class="monkey-container">
+                            <img src="monkey-sprite.png" class="monkey monkey-red" data-team="0" alt="Monkey 1">
+                        </div>
+                        <div class="tree-trunk"></div>
+                    </div>
+                    <div class="controls">
+                        <button class="up-btn" data-team="0">▲ Lên</button>
+                        <button class="down-btn" data-team="0">▼ Xuống</button>
+                    </div>
+                </div>
+
+                <div class="tree-section" data-team="1">
+                    <div class="tree">
+                        <div class="monkey-container">
+                            <img src="monkey-sprite.png" class="monkey monkey-blue" data-team="1" alt="Monkey 2">
+                        </div>
+                        <div class="tree-trunk"></div>
+                    </div>
+                    <div class="controls">
+                        <button class="up-btn" data-team="1">▲ Lên</button>
+                        <button class="down-btn" data-team="1">▼ Xuống</button>
+                    </div>
+                </div>
+
+                <div class="tree-section" data-team="2">
+                    <div class="tree">
+                        <div class="monkey-container">
+                            <img src="monkey-sprite.png" class="monkey monkey-green" data-team="2" alt="Monkey 3">
+                        </div>
+                        <div class="tree-trunk"></div>
+                    </div>
+                    <div class="controls">
+                        <button class="up-btn" data-team="2">▲ Lên</button>
+                        <button class="down-btn" data-team="2">▼ Xuống</button>
+                    </div>
+                </div>
+
+                <div class="tree-section" data-team="3">
+                    <div class="tree">
+                        <div class="monkey-container">
+                            <img src="monkey-sprite.png" class="monkey monkey-yellow" data-team="3" alt="Monkey 4">
+                        </div>
+                        <div class="tree-trunk"></div>
+                    </div>
+                    <div class="controls">
+                        <button class="up-btn" data-team="3">▲ Lên</button>
+                        <button class="down-btn" data-team="3">▼ Xuống</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question Modal -->
+        <div id="question-modal" class="modal">
+            <div class="modal-content">
+                <div id="timer-container">
+                    <div id="timer">30</div>
+                </div>
+                <div id="question-text"></div>
+                <div id="options-container"></div>
+                <button id="show-answer-btn" class="main-btn">Hiện Đáp Án</button>
+                <button id="close-modal-btn" class="main-btn secondary">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <audio id="background-music">
+        <source src="Intense-music.mp3" type="audio/mpeg">
+    </audio>
+
+    <script src="game.js"></script>
+</body>
+</html>
