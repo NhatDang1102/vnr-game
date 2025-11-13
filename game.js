@@ -740,7 +740,6 @@ function initWheel() {
 
     spinBtn.addEventListener('click', () => {
         wheelModal.style.display = 'block';
-        document.getElementById('selected-team').textContent = '';
     });
 
     closeWheelBtn.addEventListener('click', () => {
@@ -801,7 +800,6 @@ function spinWheel() {
     if (isSpinning) return;
 
     isSpinning = true;
-    document.getElementById('selected-team').textContent = 'Đang quay...';
 
     const spinDuration = 3000; // 3 seconds
     const spinRevolutions = 5 + Math.random() * 3; // 5-8 revolutions
@@ -822,14 +820,6 @@ function spinWheel() {
         if (progress < 1) {
             requestAnimationFrame(animate);
         } else {
-            // Determine selected team
-            const normalizedRotation = currentRotation % (2 * Math.PI);
-            const sliceAngle = (2 * Math.PI) / teams.length;
-            const selectedIndex = Math.floor((2 * Math.PI - normalizedRotation + sliceAngle / 2) / sliceAngle) % teams.length;
-
-            document.getElementById('selected-team').textContent = `🎉 ${teams[selectedIndex].name} được chọn!`;
-            document.getElementById('selected-team').style.color = teams[selectedIndex].color;
-
             isSpinning = false;
         }
     }
