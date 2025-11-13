@@ -744,6 +744,13 @@ function initWheel() {
 
     closeWheelBtn.addEventListener('click', () => {
         wheelModal.style.display = 'none';
+
+        // Stop wheel music when closing
+        const wheelMusic = document.getElementById('wheel-music');
+        if (wheelMusic) {
+            wheelMusic.pause();
+            wheelMusic.currentTime = 0;
+        }
     });
 
     wheelCanvas.addEventListener('click', spinWheel);
@@ -801,6 +808,15 @@ function spinWheel() {
 
     isSpinning = true;
 
+    // Play wheel music
+    const wheelMusic = document.getElementById('wheel-music');
+    if (wheelMusic) {
+        wheelMusic.currentTime = 0;
+        wheelMusic.play().catch(error => {
+            console.log('Không thể phát nhạc vòng quay:', error);
+        });
+    }
+
     const spinDuration = 3000; // 3 seconds
     const spinRevolutions = 5 + Math.random() * 3; // 5-8 revolutions
     const totalRotation = spinRevolutions * 2 * Math.PI;
@@ -820,6 +836,13 @@ function spinWheel() {
         if (progress < 1) {
             requestAnimationFrame(animate);
         } else {
+            // Stop wheel music
+            const wheelMusic = document.getElementById('wheel-music');
+            if (wheelMusic) {
+                wheelMusic.pause();
+                wheelMusic.currentTime = 0;
+            }
+
             isSpinning = false;
         }
     }
