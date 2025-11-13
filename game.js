@@ -405,9 +405,9 @@ const questions = [
 // Game State
 let currentQuestionIndex = 0;
 let usedQuestions = [];
-let monkeyPositions = [0, 0, 0, 0]; // Positions for 4 teams (0-10 steps)
-const MAX_POSITION = 10;
-const STEP_HEIGHT = 40; // pixels per step
+let monkeyPositions = [0, 0, 0, 0]; // Positions for 4 teams (0-20 steps)
+const MAX_POSITION = 20;
+const STEP_HEIGHT = 20; // pixels per step (reduced for 20 steps)
 
 let timer = 30;
 let timerInterval = null;
@@ -453,6 +453,20 @@ function initGame() {
 
     // Initialize monkey positions
     updateAllMonkeyPositions();
+
+    // Initialize progress bar
+    document.getElementById('total-questions').textContent = questions.length;
+    updateProgress();
+}
+
+// Update Progress Bar
+function updateProgress() {
+    const currentQuestion = usedQuestions.length;
+    const totalQuestions = questions.length;
+    const percentage = (currentQuestion / totalQuestions) * 100;
+
+    document.getElementById('current-question').textContent = currentQuestion;
+    document.getElementById('progress-fill').style.width = `${percentage}%`;
 }
 
 // Move Monkey
@@ -462,6 +476,9 @@ function moveMonkey(team, direction) {
     if (newPosition >= 0 && newPosition <= MAX_POSITION) {
         monkeyPositions[team] = newPosition;
         updateMonkeyPosition(team, direction);
+
+        // Play monkey sound
+        playMonkeySound();
 
         // Check if monkey reached the top
         if (newPosition === MAX_POSITION) {
@@ -518,6 +535,9 @@ function showQuestion() {
 
     usedQuestions.push(questionIndex);
     currentQuestionIndex = questionIndex;
+
+    // Update progress bar
+    updateProgress();
 
     const question = questions[currentQuestionIndex];
 
@@ -586,6 +606,17 @@ function stopMusic() {
     if (backgroundMusic) {
         backgroundMusic.pause();
         backgroundMusic.currentTime = 0;
+    }
+}
+
+// Play Monkey Sound
+function playMonkeySound() {
+    const monkeySound = document.getElementById('monkey-sound');
+    if (monkeySound) {
+        monkeySound.currentTime = 0;
+        monkeySound.play().catch(error => {
+            console.log('Không thể phát tiếng khỉ:', error);
+        });
     }
 }
 
@@ -684,5 +715,130 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
+// Spinning Wheel
+let wheelCanvas, wheelCtx;
+let currentRotation = 0;
+let isSpinning = false;
+
+const teams = [
+    { name: 'Nhóm 1', color: '#e74c3c' },
+    { name: 'Nhóm 2', color: '#3498db' },
+    { name: 'Nhóm 3', color: '#2ecc71' },
+    { name: 'Nhóm 4', color: '#f39c12' }
+];
+
+function initWheel() {
+    wheelCanvas = document.getElementById('wheel-canvas');
+    if (!wheelCanvas) return;
+
+    wheelCtx = wheelCanvas.getContext('2d');
+    drawWheel();
+
+    const spinBtn = document.getElementById('spin-wheel-btn');
+    const closeWheelBtn = document.getElementById('close-wheel-btn');
+    const wheelModal = document.getElementById('wheel-modal');
+
+    spinBtn.addEventListener('click', () => {
+        wheelModal.style.display = 'block';
+        document.getElementById('selected-team').textContent = '';
+    });
+
+    closeWheelBtn.addEventListener('click', () => {
+        wheelModal.style.display = 'none';
+    });
+
+    wheelCanvas.addEventListener('click', spinWheel);
+}
+
+function drawWheel() {
+    const centerX = wheelCanvas.width / 2;
+    const centerY = wheelCanvas.height / 2;
+    const radius = 180;
+    const sliceAngle = (2 * Math.PI) / teams.length;
+
+    wheelCtx.clearRect(0, 0, wheelCanvas.width, wheelCanvas.height);
+    wheelCtx.save();
+    wheelCtx.translate(centerX, centerY);
+    wheelCtx.rotate(currentRotation);
+
+    teams.forEach((team, index) => {
+        const startAngle = index * sliceAngle;
+        const endAngle = startAngle + sliceAngle;
+
+        // Draw slice
+        wheelCtx.beginPath();
+        wheelCtx.arc(0, 0, radius, startAngle, endAngle);
+        wheelCtx.lineTo(0, 0);
+        wheelCtx.fillStyle = team.color;
+        wheelCtx.fill();
+        wheelCtx.strokeStyle = '#fff';
+        wheelCtx.lineWidth = 3;
+        wheelCtx.stroke();
+
+        // Draw text
+        wheelCtx.save();
+        wheelCtx.rotate(startAngle + sliceAngle / 2);
+        wheelCtx.textAlign = 'center';
+        wheelCtx.fillStyle = '#fff';
+        wheelCtx.font = 'bold 24px Arial';
+        wheelCtx.fillText(team.name, radius * 0.6, 10);
+        wheelCtx.restore();
+    });
+
+    // Draw center circle
+    wheelCtx.beginPath();
+    wheelCtx.arc(0, 0, 30, 0, 2 * Math.PI);
+    wheelCtx.fillStyle = '#fff';
+    wheelCtx.fill();
+    wheelCtx.strokeStyle = '#2c3e50';
+    wheelCtx.lineWidth = 3;
+    wheelCtx.stroke();
+
+    wheelCtx.restore();
+}
+
+function spinWheel() {
+    if (isSpinning) return;
+
+    isSpinning = true;
+    document.getElementById('selected-team').textContent = 'Đang quay...';
+
+    const spinDuration = 3000; // 3 seconds
+    const spinRevolutions = 5 + Math.random() * 3; // 5-8 revolutions
+    const totalRotation = spinRevolutions * 2 * Math.PI;
+    const startTime = Date.now();
+    const startRotation = currentRotation;
+
+    function animate() {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / spinDuration, 1);
+
+        // Easing function for smooth deceleration
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        currentRotation = startRotation + totalRotation * easeOut;
+
+        drawWheel();
+
+        if (progress < 1) {
+            requestAnimationFrame(animate);
+        } else {
+            // Determine selected team
+            const normalizedRotation = currentRotation % (2 * Math.PI);
+            const sliceAngle = (2 * Math.PI) / teams.length;
+            const selectedIndex = Math.floor((2 * Math.PI - normalizedRotation + sliceAngle / 2) / sliceAngle) % teams.length;
+
+            document.getElementById('selected-team').textContent = `🎉 ${teams[selectedIndex].name} được chọn!`;
+            document.getElementById('selected-team').style.color = teams[selectedIndex].color;
+
+            isSpinning = false;
+        }
+    }
+
+    animate();
+}
+
 // Initialize when page loads
-window.addEventListener('load', initGame);
+window.addEventListener('load', () => {
+    initGame();
+    initWheel();
+});

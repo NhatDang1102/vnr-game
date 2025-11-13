@@ -3,7 +3,8 @@
     "allow": [
       "Bash(dir)",
       "Bash(git init)",
-      "Bash(git add .)"
+      "Bash(git add .)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nInitial commit: VNR Quiz Game - Khỉ Leo Cây\n\nGame features:\n- 4 teams with animated monkeys climbing trees\n- 40 quiz questions about Vietnamese history and Đại hội XIII\n- Timer with background music\n- Confetti effect when reaching the top\n- Beautiful gradient UI with animations\n- Fully responsive design\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []

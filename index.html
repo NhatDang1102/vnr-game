@@ -11,7 +11,32 @@
         <!-- Header -->
         <div id="header">
             <h1>Trò Chơi Khỉ Leo Cây</h1>
-            <button id="show-question-btn" class="main-btn">Hiện Câu Hỏi</button>
+
+            <!-- Progress Bar -->
+            <div id="progress-container">
+                <div id="progress-text">Câu hỏi: <span id="current-question">0</span>/<span id="total-questions">40</span></div>
+                <div id="progress-bar">
+                    <div id="progress-fill"></div>
+                </div>
+            </div>
+
+            <div class="header-buttons">
+                <button id="spin-wheel-btn" class="main-btn">Quay Số</button>
+                <button id="show-question-btn" class="main-btn">Hiện Câu Hỏi</button>
+            </div>
+        </div>
+
+        <!-- Spinning Wheel Modal -->
+        <div id="wheel-modal" class="modal">
+            <div class="modal-content wheel-content">
+                <h2>Vòng Quay May Mắn</h2>
+                <div id="wheel-container">
+                    <div id="wheel-pointer">▼</div>
+                    <canvas id="wheel-canvas" width="400" height="400"></canvas>
+                </div>
+                <div id="selected-team"></div>
+                <button id="close-wheel-btn" class="main-btn secondary">Đóng</button>
+            </div>
         </div>
 
         <!-- Game Area -->
@@ -88,6 +113,10 @@
 
     <audio id="background-music">
         <source src="Intense-music.mp3" type="audio/mpeg">
+    </audio>
+
+    <audio id="monkey-sound">
+        <source src="monkey-cry.mp3" type="audio/mpeg">
     </audio>
 
     <script src="game.js"></script>
